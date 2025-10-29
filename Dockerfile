@@ -4,6 +4,9 @@ FROM node:16-alpine as frontend
 # Set working directory
 WORKDIR /app
 
+# Start the Django server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
 # Copy the frontend code
 COPY client/package*.json ./
 COPY client/vite.config.js ./
