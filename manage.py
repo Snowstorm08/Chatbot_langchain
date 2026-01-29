@@ -3,21 +3,49 @@
 import os
 import sys
 import subprocess
+from pathlib import Path
+
+
+CLIENT_DIR = Path(__file__).resolve().parent / "client"
+
+
+def run_frontend_build():
+    """Run npm install and build safely."""
+    if not CLIENT_DIR.exists():
+        print("⚠️ Client directory not found. Skipping frontend build.")
+        return
+
+    try:
+        print("📦 Installing frontend dependencies...")
+        subprocess.run(
+            ["npm", "install"],
+            cwd=CLIENT_DIR,
+            check=True,
+            shell=os.name == "nt",
+        )
+
+        print("🏗️ Building frontend...")
+        subprocess.run(
+            ["npm", "run", "build"],
+            cwd=CLIENT_DIR,
+            check=True,
+            shell=os.name == "nt",
+        )
+
+    except subprocess.CalledProcessError as e:
+        print("❌ Frontend build failed")
+        sys.exit(e.returncode)
 
 
 def main():
-    # Run npm build command first
-    if os.name == 'nt':
-        npm_install = subprocess.Popen(["npm", "install"], cwd="client/", shell=True)
-        npm_build = subprocess.Popen(["npm", "run", "build"], cwd="client/", shell=True)
-    else:
-        npm_install = subprocess.Popen(["npm", "install"], cwd="client/")
-        npm_build = subprocess.Popen(["npm", "run", "build"], cwd="client/")
-    npm_install.wait()  # Wait for npm install to finish
-    npm_build.wait()  # Wait for npm build to finish
-    
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+
+    # Only run frontend build for runserver / collectstatic
+    if len(sys.argv) > 1 and sys.argv[1] in {"runserver", "collectstatic"}:
+        run_frontend_build()
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "myproject.settings")
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -26,8 +54,9 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
