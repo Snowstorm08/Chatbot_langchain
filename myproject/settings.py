@@ -10,10 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------------------------------------------------------------
 # SECURITY
 # ------------------------------------------------------------------------------
-SECRET_KEY = config(
-    "SECRET_KEY",
-    default="django-insecure-change-this-in-production"
-)
+SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = config("DEBUG", default=False, cast=bool)
 
@@ -35,6 +32,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # Third-party
+    "corsheaders",
+
     # Local apps
     "myapp.apps.MyappConfig",
 ]
@@ -42,8 +42,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
 
-    # WhiteNoise (static files in production)
+    # WhiteNoise
     "whitenoise.middleware.WhiteNoiseMiddleware",
+
+    # CORS
+    "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -54,6 +57,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "myproject.urls"
+WSGI_APPLICATION = "myproject.wsgi.application"
 
 # ------------------------------------------------------------------------------
 # TEMPLATES (SPA support)
@@ -74,10 +78,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "myproject.wsgi.application"
-
 # ------------------------------------------------------------------------------
-# DATABASE
+# DATABASE (SQLite default, PostgreSQL ready)
 # ------------------------------------------------------------------------------
 DATABASES = {
     "default": {
@@ -93,6 +95,7 @@ DATABASES = {
         "PASSWORD": config("DB_PASSWORD", default=""),
         "HOST": config("DB_HOST", default=""),
         "PORT": config("DB_PORT", default=""),
+        "CONN_MAX_AGE": 60,
     }
 }
 
@@ -115,7 +118,7 @@ USE_I18N = True
 USE_TZ = True
 
 # ------------------------------------------------------------------------------
-# STATIC FILES (React / Vite / Vue)
+# STATIC FILES
 # ------------------------------------------------------------------------------
 STATIC_URL = "/assets/"
 
@@ -125,12 +128,10 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_STORAGE = (
-    "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ------------------------------------------------------------------------------
-# MEDIA FILES (optional but future-proof)
+# MEDIA FILES
 # ------------------------------------------------------------------------------
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -139,6 +140,17 @@ MEDIA_ROOT = BASE_DIR / "media"
 # DEFAULT PRIMARY KEY FIELD
 # ------------------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ------------------------------------------------------------------------------
+# CORS CONFIG (API usage)
+# ------------------------------------------------------------------------------
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:5173",
+    cast=Csv()
+)
+
+CORS_ALLOW_CREDENTIALS = True
 
 # ------------------------------------------------------------------------------
 # SECURITY HARDENING
@@ -151,17 +163,33 @@ CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = not DEBUG
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# HSTS (only enable in production)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
 # ------------------------------------------------------------------------------
-# LOGGING (production safe)
+# LOGGING
 # ------------------------------------------------------------------------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "standard": {
+            "format": "[%(asctime)s] %(levelname)s %(name)s: %(message)s",
+        },
+    },
     "handlers": {
-        "console": {"class": "logging.StreamHandler"},
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+        },
     },
     "root": {
         "handlers": ["console"],
-        "level": "INFO" if not DEBUG else "DEBUG",
+        "level": "DEBUG" if DEBUG else "INFO",
     },
 }
