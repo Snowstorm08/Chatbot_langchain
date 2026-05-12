@@ -1,37 +1,134 @@
+import { useCallback } from "react";
 import { HeroHighlight, HackerText } from "../components";
 
 const HomePage = () => {
   const focusStyles =
-    "focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50";
+    "focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950";
+
+  const handleNavigation = useCallback(() => {
+    window.location.href = "/chat";
+  }, []);
 
   return (
     <HeroHighlight>
-      <div className="h-screen flex flex-col items-center font-mono justify-center">
-        <HackerText
-          text="Welcome to Revlis Chat"
-          styles="text-4xl font-bold mb-4"
-        ></HackerText>
-        {/* <h1 className="text-4xl font-bold mb-4">Welcome to Revlis Chat</h1> */}
-        <h3 className="text-xl font-[500] text-gray-950 mb-4">
-          Your Personalized Medical Assistant
-        </h3>
-        <p className="text-md mb-4 w-4/5  text-gray-950">
-          Welcome to our state-of-the-art LLM chatbot, powered by cutting-edge
-          technology to provide you with accurate and helpful medical
-          information. Our LLM chatbot is built using the LLaMA-2 model
-          fine-tuned with a vast collection of medical papers, ensuring you get
-          precise and relevant answers to your health-related questions.
-        </p>
-        <button
-          onClick={() => (window.location.href = "/chat")}
-          className={`w-1/4 relative inline-flex h-12 overflow-hidden rounded-lg p-[1px] ${focusStyles}`}
+      <main
+        className="
+          min-h-screen
+          flex
+          items-center
+          justify-center
+          px-6
+          py-12
+          font-mono
+        "
+      >
+        <section
+          className="
+            flex
+            max-w-4xl
+            flex-col
+            items-center
+            text-center
+          "
         >
-          <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-          <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-lg bg-slate-950 hover:bg-[#050c2e] transition-all duration-150 ease-in px-3 py-1 text-md font-bold text-white backdrop-blur-3xl">
-            Start Chat
-          </span>
-        </button>
-      </div>
+          {/* Title */}
+          <HackerText
+            text="Welcome to Revlis Chat"
+            styles="
+              mb-5
+              text-4xl
+              font-bold
+              tracking-tight
+              text-white
+              sm:text-5xl
+              lg:text-6xl
+            "
+          />
+
+          {/* Subtitle */}
+          <h2
+            className="
+              mb-5
+              text-lg
+              font-medium
+              text-slate-300
+              sm:text-xl
+            "
+          >
+            Your Personalized Medical Assistant
+          </h2>
+
+          {/* Description */}
+          <p
+            className="
+              mb-8
+              max-w-3xl
+              text-sm
+              leading-7
+              text-slate-400
+              sm:text-base
+            "
+          >
+            Welcome to our state-of-the-art AI medical assistant powered by
+            advanced LLM technology. Revlis Chat uses a fine-tuned LLaMA model
+            trained on extensive medical literature to provide accurate,
+            contextual, and helpful responses to your health-related questions.
+          </p>
+
+          {/* CTA Button */}
+          <button
+            type="button"
+            onClick={handleNavigation}
+            className={`
+              group
+              relative
+              inline-flex
+              h-12
+              overflow-hidden
+              rounded-xl
+              p-[1px]
+              transition-all
+              duration-300
+              hover:scale-[1.02]
+              active:scale-[0.98]
+              ${focusStyles}
+            `}
+          >
+            {/* Animated Border */}
+            <span
+              className="
+                absolute
+                inset-[-1000%]
+                animate-[spin_3s_linear_infinite]
+                bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]
+              "
+            />
+
+            {/* Inner Content */}
+            <span
+              className="
+                inline-flex
+                h-full
+                w-full
+                items-center
+                justify-center
+                rounded-xl
+                bg-slate-950
+                px-8
+                text-sm
+                font-semibold
+                text-white
+                backdrop-blur-3xl
+                transition-colors
+                duration-200
+                group-hover:bg-slate-900
+              "
+            >
+              Start Chat
+            </span>
+          </button>
+        </section>
+      </main>
     </HeroHighlight>
   );
 };
